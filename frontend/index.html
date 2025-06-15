@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-box">
+            <h2>Bienvenido al Gestor de Tareas</h2>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Iniciar Sesión</button>
+                <button class="auth-tab" data-tab="register">Registrarse</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Correo</label>
+                    <input type="email" id="loginEmail" placeholder="Ingresa tu correo" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span class="material-icons">login</span>
+                    Iniciar Sesión
+                </button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="registerUsername">Usuario</label>
+                    <input type="text" id="registerUsername" placeholder="Elige un nombre de usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Correo</label>
+                    <input type="email" id="registerEmail" placeholder="Ingresa tu correo" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Contraseña</label>
+                    <input type="password" id="registerPassword" placeholder="Elige una contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span class="material-icons">person_add</span>
+                    Registrarse
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="appContainer" class="app-container" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>
+                <span class="material-icons">task_alt</span>
+                Gestor de Tareas
+            </h1>
+            <div class="user-info">
+                <span class="material-icons">account_circle</span>
+                <span id="userUsername"></span>
+                <button id="logoutBtn" class="btn-secondary">
+                    <span class="material-icons">logout</span>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <button id="newTaskBtn" class="btn-primary">
+                    <span class="material-icons">add</span>
+                    Nueva Tarea
+                </button>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="#" data-view="tasks" class="active">
+                                <span class="material-icons">list</span>
+                                <span>Lista</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-view="kanban">
+                                <span class="material-icons">view_kanban</span>
+                                <span>Tablero</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-view="calendar">
+                                <span class="material-icons">calendar_today</span>
+                                <span>Calendario</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-view="reports">
+                                <span class="material-icons">insights</span>
+                                <span>Reportes</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Task List View -->
+            <div id="tasksView" class="view">
+                <div class="filters">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Buscar tareas...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter">
+                            <option value="">Todos los Estados</option>
+                            <option value="pending">Pendiente</option>
+                            <option value="in_progress">En Progreso</option>
+                            <option value="completed">Completada</option>
+                        </select>
+                        <select id="priorityFilter">
+                            <option value="">Todas las Prioridades</option>
+                            <option value="low">Baja</option>
+                            <option value="medium">Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                        <select id="categoryFilter">
+                            <option value="">Todas las Categorías</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="taskList" class="task-list"></div>
+            </div>
+
+            <!-- Kanban View -->
+            <div id="kanbanView" class="view" style="display: none;">
+                <div class="kanban-board">
+                    <div class="kanban-column" data-status="pending">
+                        <div class="kanban-column-header">
+                            <h3>Pendiente</h3>
+                            <span class="task-count">0</span>
+                        </div>
+                        <div class="kanban-tasks" id="pendingTasks"></div>
+                    </div>
+                    <div class="kanban-column" data-status="in_progress">
+                        <div class="kanban-column-header">
+                            <h3>En Progreso</h3>
+                            <span class="task-count">0</span>
+                        </div>
+                        <div class="kanban-tasks" id="inProgressTasks"></div>
+                    </div>
+                    <div class="kanban-column" data-status="completed">
+                        <div class="kanban-column-header">
+                            <h3>Completada</h3>
+                            <span class="task-count">0</span>
+                        </div>
+                        <div class="kanban-tasks" id="completedTasks"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendarView" class="view" style="display: none;">
+                <div id="calendar"></div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="reportsView" class="view" style="display: none;">
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Resumen de Tareas</h3>
+                        <div id="summaryReport"></div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Tareas por Categoría</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="report-card">
+                        <h3>Seguimiento de Tiempo</h3>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tarea</th>
+                                        <th>Estimado</th>
+                                        <th>Real</th>
+                                        <th>Diferencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="timeTrackingTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Tendencia de Productividad</h3>
+                        <canvas id="productivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Modal -->
+        <div id="taskModal" class="modal">
+            <div class="modal-content">
+                <span class="close material-icons">close</span>
+                <h2>Nueva Tarea</h2>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">Título</label>
+                        <input type="text" id="taskTitle" placeholder="Ingresa el título de la tarea" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Descripción</label>
+                        <textarea id="taskDescription" placeholder="Ingresa la descripción de la tarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskStatus">Estado</label>
+                            <select id="taskStatus">
+                                <option value="pending">Pendiente</option>
+                                <option value="in_progress">En Progreso</option>
+                                <option value="completed">Completada</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskPriority">Prioridad</label>
+                            <select id="taskPriority">
+                                <option value="low">Baja</option>
+                                <option value="medium">Media</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskDueDate">Fecha Límite</label>
+                            <input type="datetime-local" id="taskDueDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="taskCategory">Categoría</label>
+                            <select id="taskCategory">
+                                <option value="development">Desarrollo</option>
+                                <option value="design">Diseño</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="testing">Pruebas</option>
+                                <option value="documentation">Documentación</option>
+                                <option value="support">Soporte</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskEstimatedHours">Horas Estimadas</label>
+                            <input type="number" id="taskEstimatedHours" min="0" step="0.5" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="taskActualHours">Horas Reales</label>
+                            <input type="number" id="taskActualHours" min="0" step="0.5" placeholder="0.0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskTags">Etiquetas</label>
+                        <input type="text" id="taskTags" placeholder="Ingresa las etiquetas separadas por comas">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelTaskBtn">
+                            <span class="material-icons">close</span>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <span class="material-icons">save</span>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
